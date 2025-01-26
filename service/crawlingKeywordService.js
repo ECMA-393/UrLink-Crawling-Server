@@ -26,9 +26,8 @@ const getCrawlingKeyword = async (req, res) => {
     if (hasKeyword) {
       return res.status(200).json({
         url: req.params.url,
-        urlLink: req.params.url,
         hasKeyword: hasKeyword,
-        urlText: innerText,
+        urlText: innerText.replace(/\n|\r|\t/g, ""),
       });
     } else if (innerText === "") {
       await page.waitForSelector("iframe", { timeout: TIMEOUT });
@@ -49,10 +48,9 @@ const getCrawlingKeyword = async (req, res) => {
       }
       if (hasKeywordOfIframe) {
         return res.status(200).json({
-          urlLink: req.params.url,
-          keyword: req.query.keyword,
+          url: req.params.url,
           hasKeyword: hasKeywordOfIframe,
-          urlText: iframeInnerText,
+          urlText: iframeInnerText.replace(/\n|\r|\t/g, ""),
         });
       } else if (!hasKeywordOfIframe) {
         return res
