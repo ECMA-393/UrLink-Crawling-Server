@@ -29,7 +29,7 @@ const getCrawlingKeyword = async (req, res) => {
         hasKeyword: hasKeyword,
         urlText: innerText.replace(/\n|\r|\t/g, ""),
       });
-    } else if (innerText === "") {
+    } else if (!innerText) {
       await page.waitForSelector("iframe", { timeout: TIMEOUT });
       const iframeUrl = await page.evaluate(
         () => document.querySelector("iframe").src
