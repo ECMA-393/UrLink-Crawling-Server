@@ -1,15 +1,5 @@
 const puppeteer = require("puppeteer");
 
-const isCheckTrueThisUrl = (url) => {
-  /* eslint-disable */
-  const urlRegex = /^(http|https):\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
-  if (urlRegex.test(url)) {
-    return true;
-  } else {
-    return false;
-  }
-};
-
 const getCrawlingKeyword = async (req, res) => {
   const decodedUrl = decodeURIComponent(req.params.url);
   const browser = await puppeteer.launch({ headless: true });
@@ -23,11 +13,20 @@ const getCrawlingKeyword = async (req, res) => {
     let innerText = await page.evaluate(() => document.body.innerText);
     const hasKeyword = innerText.includes(req.query.keyword);
 
+    const keywordSentence = getAllSentence(innerText).find((sentence) =>
+      sentence.includes(req.query.keyword)
+    );
+
+    let urlText = "";
+    if (keywordSentence) {
+      urlText = getKeywordSentence(keywordSentence, req.query.keyword);
+    }
+
     if (hasKeyword) {
       return res.status(200).json({
         url: req.params.url,
         hasKeyword: hasKeyword,
-        urlText: innerText.replace(/\n|\r|\t/g, ""),
+        urlText: urlText,
       });
     } else if (!innerText) {
       await page.waitForSelector("iframe", { timeout: TIMEOUT });
@@ -43,6 +42,15 @@ const getCrawlingKeyword = async (req, res) => {
       let iframeInnerText = await page.evaluate(() => document.body.innerText);
       const hasKeywordOfIframe = iframeInnerText.includes(req.query.keyword);
 
+      const keywordSentence = getAllSentence(iframeInnerText).find((sentence) =>
+        sentence.includes(req.query.keyword)
+      );
+
+      let urlText = "";
+      if (keywordSentence) {
+        urlText = getKeywordSentence(keywordSentence, req.query.keyword);
+      }
+
       if (!iframeUrl || !hasiframeUrlOfNaver) {
         throw new Error(`[Invalid iframe URL]`);
       }
@@ -50,7 +58,7 @@ const getCrawlingKeyword = async (req, res) => {
         return res.status(200).json({
           url: req.params.url,
           hasKeyword: hasKeywordOfIframe,
-          urlText: iframeInnerText.replace(/\n|\r|\t/g, ""),
+          urlText: urlText,
         });
       } else if (!hasKeywordOfIframe) {
         return res
@@ -77,6 +85,42 @@ const getCrawlingKeyword = async (req, res) => {
   } finally {
     await browser.close();
   }
+};
+
+const isCheckTrueThisUrl = (url) => {
+  /* eslint-disable */
+  const urlRegex = /^(http|https):\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
+  if (urlRegex.test(url)) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const getAllSentence = (innerText) => {
+  return innerText
+    .replace(/\n|\r|\t/g, " ")
+    .split(/(?<=다\. |요\. |니다\. |\. |! |\? )/)
+    .map((sentence) => sentence.trim())
+    .filter((sentence) => sentence);
+};
+
+const getKeywordSentence = (sentence, keyword) => {
+  const words = sentence.split(/\s+/);
+  const keywordIndex = words.findIndex((word) => word.includes(keyword));
+  const startWordIndex = Math.max(0, keywordIndex - 3);
+  const endWordIndex = Math.min(words.length, keywordIndex + 4);
+  const slicedWords = words.slice(startWordIndex, endWordIndex);
+  let keywordSentence = slicedWords.join(" ");
+
+  if (startWordIndex >= 0) {
+    keywordSentence = "... " + keywordSentence;
+  }
+  if (endWordIndex <= words.length) {
+    keywordSentence += " ...";
+  }
+
+  return keywordSentence;
 };
 
 module.exports = { getCrawlingKeyword };
