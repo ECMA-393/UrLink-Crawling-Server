@@ -106,10 +106,15 @@ const getAllSentence = (innerText) => {
 };
 
 const getKeywordSentence = (sentence, keyword) => {
+  const theNumberOfWordBefore = 3;
+  const theNumberOfWordAfter = 3;
   const words = sentence.split(/\s+/);
   const keywordIndex = words.findIndex((word) => word.includes(keyword));
-  const startWordIndex = Math.max(0, keywordIndex - 3);
-  const endWordIndex = Math.min(words.length, keywordIndex + 4);
+  const startWordIndex = Math.max(0, keywordIndex - theNumberOfWordBefore);
+  const endWordIndex = Math.min(
+    words.length,
+    keywordIndex + theNumberOfWordAfter + 1
+  );
   const slicedWords = words.slice(startWordIndex, endWordIndex);
   let keywordSentence = slicedWords.join(" ");
 
