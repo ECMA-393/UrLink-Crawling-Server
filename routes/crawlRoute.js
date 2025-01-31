@@ -8,8 +8,8 @@ const {
 
 const router = express.Router();
 
-router.get("/:url", getCrawlingTitle);
 router.get("/:url/search", getCrawlingKeyword);
 router.get("/all/:url/search", getCrawlingContentKeyword);
+router.get("/title/:url/search", getCrawlingTitle);
 
 module.exports = router;
