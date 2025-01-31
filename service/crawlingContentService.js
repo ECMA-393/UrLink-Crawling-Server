@@ -46,15 +46,15 @@ const getCrawlingContentKeyword = async (req, res) => {
       return res.status(200).json({
         url: req.params.url,
         hasTitleKeyword: hasTitleKeyword,
-        urlTitle: title,
         hasKeyword: hasKeyword,
+        urlTitle: title,
         urlText: urlText,
       });
     } else {
       return res.status(200).send({ message: `[This keyword does not exist]` });
     }
   } catch (error) {
-    if (isCheckTrueThisUrl(decodedUrl) === false) {
+    if (!isCheckTrueThisUrl(decodedUrl)) {
       return res
         .status(400)
         .send({ message: `[Invalid Characters in HTTP request]  ${error}` });

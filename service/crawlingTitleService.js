@@ -21,7 +21,7 @@ const getCrawlingTitle = async (req, res) => {
       urlTitle: title,
     });
   } catch (error) {
-    if (isCheckTrueThisUrl(decodedLink) === false) {
+    if (!isCheckTrueThisUrl(decodedLink)) {
       return res
         .status(400)
         .send({ message: `[Invalid Characters in HTTP request]  ${error}` });
