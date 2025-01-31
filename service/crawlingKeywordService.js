@@ -101,8 +101,14 @@ const getAllSentence = (innerText) => {
   return innerText
     .replace(/\n|\r|\t/g, " ")
     .split(/(?<=다\. |요\. |니다\. |\. |! |\? )/)
-    .map((sentence) => sentence.trim())
-    .filter((sentence) => sentence);
+    .reduce((array, sentence) => {
+      const trimedSentence = sentence.trim();
+
+      if (trimedSentence) {
+        array.push(trimedSentence);
+      }
+      return array;
+    }, []);
 };
 
 const getKeywordSentence = (sentence, keyword) => {
