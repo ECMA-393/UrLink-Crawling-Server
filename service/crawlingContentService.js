@@ -13,8 +13,8 @@ const getCrawlingContentKeyword = async (req, res) => {
     const title = await page.$eval("title", (element) => element.textContent);
     let innerText = await page.$eval("body", (body) => body.innerText);
 
-    const hasTitleKeyword = title.includes(keyword);
-    let hasKeyword = innerText.includes(keyword);
+    const hasTitleKeyword = title.toUpperCase().includes(keyword.toUpperCase());
+    let hasKeyword = innerText.toUpperCase().includes(keyword.toUpperCase());
 
     if (!innerText) {
       await page.waitForSelector("iframe", { timeout: TIMEOUT });
@@ -26,7 +26,7 @@ const getCrawlingContentKeyword = async (req, res) => {
         "https://blog.naver.com"
       );
       innerText = await page.evaluate(() => document.body.innerText);
-      hasKeyword = innerText.includes(keyword);
+      hasKeyword = innerText.toUpperCase().includes(keyword.toUpperCase());
 
       if (!iframeUrl || !hasiframeUrlOfNaver) {
         throw new Error(`[Invalid iframe URL]`);
@@ -34,7 +34,7 @@ const getCrawlingContentKeyword = async (req, res) => {
     }
 
     const keywordSentence = getAllSentence(innerText).find((sentence) =>
-      sentence.includes(keyword)
+      sentence.toUpperCase().includes(keyword.toUpperCase())
     );
 
     let urlText = "";
@@ -96,7 +96,9 @@ const getKeywordSentence = (sentence, keyword) => {
   const theNumberOfWordBefore = 3;
   const theNumberOfWordAfter = 3;
   const words = sentence.split(/\s+/);
-  const keywordIndex = words.findIndex((word) => word.includes(keyword));
+  const keywordIndex = words.findIndex((word) =>
+    word.toUpperCase().includes(keyword.toUpperCase())
+  );
   const startWordIndex = Math.max(0, keywordIndex - theNumberOfWordBefore);
   const endWordIndex = Math.min(
     words.length,

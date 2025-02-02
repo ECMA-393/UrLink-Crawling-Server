@@ -2,24 +2,24 @@ const puppeteer = require("puppeteer");
 
 const getCrawlingKeyword = async (req, res) => {
   const decodedUrl = decodeURIComponent(req.params.url);
+  const keyword = req.query.keyword;
   const browser = await puppeteer.launch({ headless: true });
   const TIMEOUT = 20000;
 
   try {
     const page = await browser.newPage();
-
     await page.goto(decodedUrl);
 
     let innerText = await page.evaluate(() => document.body.innerText);
-    const hasKeyword = innerText.includes(req.query.keyword);
+    const hasKeyword = innerText.toUpperCase().includes(keyword.toUpperCase());
 
     const keywordSentence = getAllSentence(innerText).find((sentence) =>
-      sentence.includes(req.query.keyword)
+      sentence.toUpperCase().includes(keyword.toUpperCase())
     );
 
     let urlText = "";
     if (keywordSentence) {
-      urlText = getKeywordSentence(keywordSentence, req.query.keyword);
+      urlText = getKeywordSentence(keywordSentence, keyword);
     }
 
     if (hasKeyword) {
@@ -40,15 +40,17 @@ const getCrawlingKeyword = async (req, res) => {
         "https://blog.naver.com"
       );
       let iframeInnerText = await page.evaluate(() => document.body.innerText);
-      const hasKeywordOfIframe = iframeInnerText.includes(req.query.keyword);
+      const hasKeywordOfIframe = iframeInnerText
+        .toUpperCase()
+        .includes(keyword.toUpperCase());
 
       const keywordSentence = getAllSentence(iframeInnerText).find((sentence) =>
-        sentence.includes(req.query.keyword)
+        sentence.includes(keyword.toUpperCase())
       );
 
       let urlText = "";
       if (keywordSentence) {
-        urlText = getKeywordSentence(keywordSentence, req.query.keyword);
+        urlText = getKeywordSentence(keywordSentence, keyword);
       }
 
       if (!iframeUrl || !hasiframeUrlOfNaver) {
@@ -115,7 +117,9 @@ const getKeywordSentence = (sentence, keyword) => {
   const theNumberOfWordBefore = 3;
   const theNumberOfWordAfter = 3;
   const words = sentence.split(/\s+/);
-  const keywordIndex = words.findIndex((word) => word.includes(keyword));
+  const keywordIndex = words.findIndex((word) =>
+    word.toUpperCase().includes(keyword.toUpperCase())
+  );
   const startWordIndex = Math.max(0, keywordIndex - theNumberOfWordBefore);
   const endWordIndex = Math.min(
     words.length,
