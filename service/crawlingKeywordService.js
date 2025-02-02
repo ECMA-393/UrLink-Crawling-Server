@@ -13,14 +13,9 @@ const getCrawlingKeyword = async (req, res) => {
     let innerText = await page.evaluate(() => document.body.innerText);
     const hasKeyword = innerText.toUpperCase().includes(keyword.toUpperCase());
 
-    const keywordSentence = getAllSentence(innerText).find((sentence) =>
+    const urlText = getAllSentence(innerText).find((sentence) =>
       sentence.toUpperCase().includes(keyword.toUpperCase())
     );
-
-    let urlText = "";
-    if (keywordSentence) {
-      urlText = getKeywordSentence(keywordSentence, keyword);
-    }
 
     if (hasKeyword) {
       return res.status(200).json({
@@ -44,14 +39,9 @@ const getCrawlingKeyword = async (req, res) => {
         .toUpperCase()
         .includes(keyword.toUpperCase());
 
-      const keywordSentence = getAllSentence(iframeInnerText).find((sentence) =>
+      const urlText = getAllSentence(iframeInnerText).find((sentence) =>
         sentence.includes(keyword.toUpperCase())
       );
-
-      let urlText = "";
-      if (keywordSentence) {
-        urlText = getKeywordSentence(keywordSentence, keyword);
-      }
 
       if (!iframeUrl || !hasiframeUrlOfNaver) {
         throw new Error(`[Invalid iframe URL]`);
@@ -111,31 +101,6 @@ const getAllSentence = (innerText) => {
       }
       return array;
     }, []);
-};
-
-const getKeywordSentence = (sentence, keyword) => {
-  const theNumberOfWordBefore = 3;
-  const theNumberOfWordAfter = 3;
-  const words = sentence.split(/\s+/);
-  const keywordIndex = words.findIndex((word) =>
-    word.toUpperCase().includes(keyword.toUpperCase())
-  );
-  const startWordIndex = Math.max(0, keywordIndex - theNumberOfWordBefore);
-  const endWordIndex = Math.min(
-    words.length,
-    keywordIndex + theNumberOfWordAfter + 1
-  );
-  const slicedWords = words.slice(startWordIndex, endWordIndex);
-  let keywordSentence = slicedWords.join(" ");
-
-  if (startWordIndex >= 0) {
-    keywordSentence = "... " + keywordSentence;
-  }
-  if (endWordIndex <= words.length) {
-    keywordSentence += " ...";
-  }
-
-  return keywordSentence;
 };
 
 module.exports = { getCrawlingKeyword };
