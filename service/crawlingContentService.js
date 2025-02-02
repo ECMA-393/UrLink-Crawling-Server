@@ -13,8 +13,9 @@ const getCrawlingContentKeyword = async (req, res) => {
     const title = await page.$eval("title", (element) => element.textContent);
     let innerText = await page.$eval("body", (body) => body.innerText);
 
-    const hasTitleKeyword = title.toUpperCase().includes(keyword.toUpperCase());
-    let hasKeyword = innerText.toUpperCase().includes(keyword.toUpperCase());
+    const upperCasedKeyword = keyword.toUpperCase();
+    const hasTitleKeyword = title.toUpperCase().includes(upperCasedKeyword);
+    let hasKeyword = innerText.toUpperCase().includes(upperCasedKeyword);
 
     if (!innerText) {
       await page.waitForSelector("iframe", { timeout: TIMEOUT });
@@ -26,7 +27,7 @@ const getCrawlingContentKeyword = async (req, res) => {
         "https://blog.naver.com"
       );
       innerText = await page.evaluate(() => document.body.innerText);
-      hasKeyword = innerText.toUpperCase().includes(keyword.toUpperCase());
+      hasKeyword = innerText.toUpperCase().includes(upperCasedKeyword);
 
       if (!iframeUrl || !hasiframeUrlOfNaver) {
         throw new Error(`[Invalid iframe URL]`);
@@ -34,7 +35,7 @@ const getCrawlingContentKeyword = async (req, res) => {
     }
 
     const urlText = getAllSentence(innerText).find((sentence) =>
-      sentence.toUpperCase().includes(keyword.toUpperCase())
+      sentence.toUpperCase().includes(upperCasedKeyword)
     );
 
     if (hasKeyword) {

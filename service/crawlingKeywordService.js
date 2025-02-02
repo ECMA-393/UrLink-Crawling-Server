@@ -11,10 +11,11 @@ const getCrawlingKeyword = async (req, res) => {
     await page.goto(decodedUrl);
 
     let innerText = await page.evaluate(() => document.body.innerText);
-    const hasKeyword = innerText.toUpperCase().includes(keyword.toUpperCase());
+    const upperCasedKeyword = keyword.toUpperCase();
+    const hasKeyword = innerText.toUpperCase().includes(upperCasedKeyword);
 
     const urlText = getAllSentence(innerText).find((sentence) =>
-      sentence.toUpperCase().includes(keyword.toUpperCase())
+      sentence.toUpperCase().includes(upperCasedKeyword)
     );
 
     if (hasKeyword) {
@@ -35,12 +36,13 @@ const getCrawlingKeyword = async (req, res) => {
         "https://blog.naver.com"
       );
       let iframeInnerText = await page.evaluate(() => document.body.innerText);
+      const upperCasedKeyword = keyword.toUpperCase();
       const hasKeywordOfIframe = iframeInnerText
         .toUpperCase()
-        .includes(keyword.toUpperCase());
+        .includes(upperCasedKeyword);
 
       const urlText = getAllSentence(iframeInnerText).find((sentence) =>
-        sentence.includes(keyword.toUpperCase())
+        sentence.includes(upperCasedKeyword)
       );
 
       if (!iframeUrl || !hasiframeUrlOfNaver) {
