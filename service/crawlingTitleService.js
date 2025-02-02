@@ -17,6 +17,7 @@ const getCrawlingTitle = async (req, res) => {
     }
 
     return res.status(200).json({
+      url: req.params.url,
       hasKeyword: hasTitleKeyword,
       urlTitle: title,
     });
