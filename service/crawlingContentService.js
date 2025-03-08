@@ -34,7 +34,9 @@ const getCrawlingContentKeyword = async (req, res) => {
       }
     }
 
-    const urlText = getAllSentence(innerText).find((sentence) =>
+    const allSentence = getAllSentence(innerText);
+
+    const urlText = allSentence.find((sentence) =>
       sentence.toUpperCase().includes(upperCasedKeyword)
     );
 
@@ -45,6 +47,7 @@ const getCrawlingContentKeyword = async (req, res) => {
         hasKeyword: hasKeyword,
         urlTitle: title,
         urlText: urlText,
+        urlAllText: allSentence,
       });
     } else {
       return res.status(200).send({ message: `[This keyword does not exist]` });
@@ -76,16 +79,12 @@ const isCheckTrueThisUrl = (url) => {
 
 const getAllSentence = (innerText) => {
   return innerText
-    .replace(/\n|\r|\t/g, " ")
-    .split(/(?<=다\. |요\. |니다\. |\. |! |\? )/)
-    .reduce((array, sentence) => {
-      const trimedSentence = sentence.trim();
-
-      if (trimedSentence) {
-        array.push(trimedSentence);
-      }
-      return array;
-    }, []);
+    .replace(/[\r\n\t]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(/(?<=[.?!])(?=\s)/)
+    .map((sentence) => sentence.trim())
+    .filter((sentence) => sentence.length > 0);
 };
 
 module.exports = { getCrawlingContentKeyword };
